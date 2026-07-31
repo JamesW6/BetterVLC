@@ -1,7 +1,8 @@
 use rodio::{DeviceSinkBuilder, Decoder, Player, MixerDeviceSink};
 use std::fs::{File};
+use crate::tui::Tui;
 pub struct MyPlayer{
-    sink_handle: MixerDeviceSink,
+    _sink_handle: MixerDeviceSink,
     player: Player,
 }
 impl MyPlayer{
@@ -15,17 +16,23 @@ impl MyPlayer{
         // Note that the playback stops when the player is dropped
         let player=Player::connect_new(&sink_handle.mixer());
         Self {
-            sink_handle: sink_handle,
+            _sink_handle: sink_handle,
             player: player,
         }
     }
 
-    pub fn queue_song(&mut self, song_path: &String){
-        let file = File::open(song_path).unwrap();
+    pub fn queue_song(&mut self, tui: &Tui){
+        let file = File::open(tui.song_choice.to_string()).unwrap();
         let decoder = Decoder::try_from(file).unwrap();
         self.player.append(decoder);
     }
     pub fn skip(&self){
         self.player.skip_one();
+    }
+
+    pub fn adjust_volume(&self, mut volume: u32){
+        volume = std::cmp::min(volume, 100);
+        let adjusted_volume = (volume as f32)/100.0;
+        self.player.set_volume(adjusted_volume);
     }
 }

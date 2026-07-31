@@ -6,6 +6,7 @@ use std::io::{self};
 use std::env;
 pub struct Tui {
     current_path: String,
+    path_options: Vec<String>,
     pub song_choice: String,
 }
 impl Tui {
@@ -14,8 +15,10 @@ impl Tui {
             Some(path)=> path.display().to_string(),    
             None=> "/".to_string(),     
        };
+        let path_options=paths_to_vector(&cur_path);
         Self {
             current_path: cur_path,
+            path_options: path_options,
             song_choice: "".to_string(),
         }
     }
@@ -39,6 +42,22 @@ impl Tui {
         self.current_path=append_paths(&self.current_path, &paths_vector, choice);
         return "directory".to_string()
         
+    }
+    pub fn get_paths(&self) -> &Vec<String> {
+        return &self.path_options;
+    }
+    pub fn update_cur_path(&mut self, new_path: &String) -> bool{
+        if is_directory(new_path){
+            self.current_path=new_path.to_string();
+            self.update_paths();
+            return false;
+        }else{
+            self.song_choice=new_path.to_string();
+            return true;
+        }
+    }
+    pub fn update_paths(&mut self) {
+        self.path_options=paths_to_vector(&self.current_path);
     }
 
 }
